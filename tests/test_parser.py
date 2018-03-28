@@ -53,6 +53,19 @@ def test_simple_json_str():
             mode=hszinc.MODE_JSON)
     check_simple(grid)
 
+def test_wc1382_unicode_str():
+    grid_list = hszinc.parse(
+            open('tests/data/wc1382-unicode-grid.txt','rb').read(),
+            mode=hszinc.MODE_ZINC)
+    assert len(grid_list) == 1
+
+    grid = grid_list[0]
+    assert len(grid) == 3
+
+    # The values of all the 'temperature' points should have degree symbols.
+    assert grid[0]['v2'].unit == u'\u00b0C'
+    assert grid[1]['v6'].unit == u'\u00b0C'
+
 def test_unsupported_old():
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
