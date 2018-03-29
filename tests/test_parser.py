@@ -13,6 +13,7 @@ import math
 import pytz
 import json
 import six
+import os
 
 # These are examples taken from http://project-haystack.org/doc/Zinc
 
@@ -21,6 +22,8 @@ firstName,bday
 "Jack",1973-07-23
 "Jill",1975-11-15
 '''
+
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 SIMPLE_EXAMPLE_JSON={
         'meta': {'ver':'2.0'},
@@ -57,7 +60,8 @@ def test_wc1382_unicode_str():
     hszinc.use_pint(False)
 
     grid_list = hszinc.parse(
-            open('tests/data/wc1382-unicode-grid.txt','rb').read(),
+            open(os.path.join(THIS_DIR,
+                'data', 'wc1382-unicode-grid.txt'),'rb').read(),
             mode=hszinc.MODE_ZINC)
     assert len(grid_list) == 1
 
