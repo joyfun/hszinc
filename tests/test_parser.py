@@ -6,7 +6,6 @@
 
 from __future__ import unicode_literals
 
-from pyparsing import ParseException
 import warnings
 import hszinc
 import datetime
@@ -54,6 +53,9 @@ def test_simple_json_str():
     check_simple(grid)
 
 def test_wc1382_unicode_str():
+    # Don't use pint for this, we wish to see the actual quantity value.
+    hszinc.use_pint(False)
+
     grid_list = hszinc.parse(
             open('tests/data/wc1382-unicode-grid.txt','rb').read(),
             mode=hszinc.MODE_ZINC)
@@ -63,8 +65,9 @@ def test_wc1382_unicode_str():
     assert len(grid) == 3
 
     # The values of all the 'temperature' points should have degree symbols.
-    assert grid[0]['v2'].unit == u'\u00b0C'
+    assert grid[0]['v1'].unit == u'\u00b0C'
     assert grid[1]['v6'].unit == u'\u00b0C'
+
 
 def test_unsupported_old():
     with warnings.catch_warnings(record=True) as w:
@@ -656,7 +659,7 @@ ix,list,                                                       dis
 01,[N],                                                        "A list with a NULL"
 ''')
         assert False, 'Project Haystack 2.0 does not support lists'
-    except ParseException:
+    except hszinc.zincparser.ZincParseException:
         pass
 
 def test_list_json():
@@ -1157,7 +1160,7 @@ def test_scalar_version_zinc():
         hszinc.parse_scalar('[1,2,3]', mode=hszinc.MODE_ZINC,
                 version=hszinc.VER_2_0)
         assert False, 'Version was ignored'
-    except ParseException:
+    except hszinc.zincparser.ZincParseException:
         pass
 
 def test_scalar_simple_json():
