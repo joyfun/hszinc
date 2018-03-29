@@ -72,43 +72,39 @@ class ZincParseException(ValueError):
     Exception thrown when a grid cannot be parsed successfully.  If known,
     the line and column for the grid are given.
     """
-    def __init__(self, message, grid_str, line=None, col=None):
+    def __init__(self, message, grid_str, line, col):
         self.grid_str = grid_str
         self.line = line
         self.col = col
 
         try:
             # If we know the line and column, point it out in the message.
-            if (line is not None) and (col is not None):
-                grid_str_lines = grid_str.split('\n')
-                width = max([len(l) for l in grid_str_lines])
-                linefmt = u'%%-%ds' % width
-                rowfmt = u'%4d%s' + linefmt + u'%s'
+            grid_str_lines = grid_str.split('\n')
+            width = max([len(l) for l in grid_str_lines])
+            linefmt = u'%%-%ds' % width
+            rowfmt = u'%4d%s' + linefmt + u'%s'
 
-                formatted_lines = [
-                        rowfmt % (
-                            num,
-                            ' >' if (line == num) else '| ',
-                            line_str,
-                            '< ' if (line == num) else ' |'
-                        )
-                        for (num, line_str)
-                        in enumerate(grid_str.split('\n'), 1)
-                ]
-                formatted_lines.insert(line,
-                        (u'    | ' + linefmt + u' |') \
-                                % (((col-2) * u' ') + '.^.')
-                )
+            formatted_lines = [
+                    rowfmt % (
+                        num,
+                        ' >' if (line == num) else '| ',
+                        line_str,
+                        '< ' if (line == num) else ' |'
+                    )
+                    for (num, line_str)
+                    in enumerate(grid_str.split('\n'), 1)
+            ]
+            formatted_lines.insert(line,
+                    (u'    | ' + linefmt + u' |') \
+                            % (((col-2) * u' ') + '.^.')
+            )
 
-                # Border it for readability
-                formatted_lines.insert(0, u'    .' + (u'-' * (2 + width)) + u'.')
-                formatted_lines.append(u'    \'' + (u'-' * (2 + width)) + u'\'')
+            # Border it for readability
+            formatted_lines.insert(0, u'    .' + (u'-' * (2 + width)) + u'.')
+            formatted_lines.append(u'    \'' + (u'-' * (2 + width)) + u'\'')
 
-                # Append to message
-                message += u'\n%s' % u'\n'.join(formatted_lines)
-            else:
-                # Append the raw grid
-                message += u'\n%s' % grid_str
+            # Append to message
+            message += u'\n%s' % u'\n'.join(formatted_lines)
         except: # pragma: no cover
             # We should not get here.
             LOG.exception('Exception encountered formatting log message')
