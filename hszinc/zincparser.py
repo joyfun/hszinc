@@ -33,6 +33,18 @@ LOG = logging.getLogger(__name__)
 VERSION_RE = re.compile(r'^ver:"(([^"\\]|\\[\\"bfnrt$])+)"')
 NEWLINE_RE = re.compile(r'\r?\n')
 
+# Character number regex; for exceptions
+CHAR_NUM_RE = re.compile(' *\(at char \d+\),')
+
+def reformat_exception(ex_msg, line_num=None):
+    print (ex_msg)
+    msg = CHAR_NUM_RE.sub(u'', six.text_type(ex_msg))
+    print (msg)
+    if line_num is not None:
+        return msg.replace(u'line:1', u'line:%d' % line_num)
+    else:
+        return msg
+
 # Convenience function, we want whitespace left alone.
 def _leave_ws(cls, *args, **kwargs):
     return cls(*args, **kwargs).leaveWhitespace()
@@ -526,7 +538,7 @@ def parse_grid(grid_data):
         # Raise a new exception with the appropriate line number.
         raise ZincParseException(
                 'Failed to parse column metadata: %s' \
-                        % (u'%s' % pe).replace(u'line:1', u'line:2'),
+                        % reformat_exception(pe, 2),
                 grid_data, 2, pe.col)
     except: # pragma: no cover
         # Report an error to the log if we fail to parse something.
@@ -545,8 +557,7 @@ def parse_grid(grid_data):
             # Raise a new exception with the appropriate line number.
             raise ZincParseException(
                     'Failed to parse row: %s' \
-                        % (u'%s' % pe).replace(u'line:1',
-                            u'line:%d' % line_num),
+                        % reformat_exception(pe, line_num),
                     grid_data, line_num, pe.col)
         except: # pragma: no cover
             # Report an error to the log if we fail to parse something.
@@ -569,5 +580,5 @@ def parse_scalar(scalar_data, version):
     except pp.ParseException as pe:
         # Raise a new exception with the appropriate line number.
         raise ZincParseException(
-                'Failed to parse scalar: %s' % pe,
+                'Failed to parse scalar: %s' % reformat_exception(pe),
                 scalar_data, 1, pe.col)
