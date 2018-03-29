@@ -1206,3 +1206,39 @@ def test_str_version():
     val = hszinc.parse_scalar('[1,2,3]', mode=hszinc.MODE_ZINC,
             version='2.5')
     assert val == [1.0, 2.0, 3.0]
+
+def test_malformed_grid_meta():
+    try:
+        grid_list = hszinc.parse('''ver:"2.0" ThisIsNotATag
+empty
+
+''')
+        assert False, 'Parsed a clearly invalid grid'
+    except hszinc.zincparser.ZincParseException as zpe:
+        assert zpe.line == 1
+        assert zpe.col == 11
+
+def test_malformed_col_meta():
+    try:
+        grid_list = hszinc.parse('''ver:"2.0"
+c1 goodSoFar, c2 WHOOPSIE
+,
+''')
+        assert False, 'Parsed a clearly invalid grid'
+    except hszinc.zincparser.ZincParseException as zpe:
+        assert zpe.line == 2
+        assert zpe.col == 18
+
+def test_malformed_row():
+    try:
+        grid_list = hszinc.parse('''ver:"2.0"
+c1, c2
+1, "No problems here"
+2, We should fail here
+3, "No issue, but we won't get this far"
+4, We won't see this error
+''')
+        assert False, 'Parsed a clearly invalid grid'
+    except hszinc.zincparser.ZincParseException as zpe:
+        assert zpe.line == 4
+        assert zpe.col == 4
